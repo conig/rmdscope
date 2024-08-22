@@ -14,7 +14,8 @@ end
 -- Function to get the list of R package templates
 function M.get_templates()
   -- Get the list of installed R packages
-  local packages = vim.fn.systemlist("Rscript -e 'cat(rownames(installed.packages()))'")
+  local packages_str = vim.fn.system("Rscript -e 'cat(paste(rownames(installed.packages()), collapse=\"\\n\"))'")
+  local packages = vim.split(packages_str, "\n")
   
   -- Debugging: print the number of packages found
   print("Number of R packages found: " .. #packages)
@@ -23,31 +24,32 @@ function M.get_templates()
 
   for _, pkg in ipairs(packages) do
     -- Find the template path for each package
-    local template_path = vim.fn.systemlist("Rscript -e 'system.file(\"templates\", package = \"" .. pkg .. "\")'")
+    local template_path = vim.fn.system("Rscript -e 'cat(system.file(\"templates\", package = \"" .. pkg .. "\"))'")
+    template_path = vim.trim(template_path)
 
     -- Debugging: print the package and its template path
-    print("Processing package: ", pkg)
-    print("Template path: ", template_path[1])
+    print("Processing package: " .. pkg)
+    print("Template path: " .. template_path)
 
     -- Check if the template path is valid and is a directory
-    if template_path[1] ~= "" and vim.fn.isdirectory(template_path[1]) == 1 then
-      local files = vim.fn.readdir(template_path[1])
+    if template_path ~= "" and vim.fn.isdirectory(template_path) == 1 then
+      local files = vim.fn.readdir(template_path)
 
       -- Debugging: print the number of files found
       print("Number of templates found for package " .. pkg .. ": " .. #files)
 
       -- Add each template file to the templates list
       for _, file in ipairs(files) do
-        local full_path = template_path[1] .. "/" .. file
+        local full_path = template_path .. "/" .. file
         print("Found template: " .. full_path)
         table.insert(templates, full_path)
       end
     else
       -- If the path is empty or not a directory, log the issue
-      if template_path[1] == "" then
+      if template_path == "" then
         print("Warning: No template path found for package: " .. pkg)
-      elseif vim.fn.isdirectory(template_path[1]) == 0 then
-        print("Warning: Path is not a directory: " .. template_path[1])
+      elseif vim.fn.isdirectory(template_path) == 0 then
+        print("Warning: Path is not a directory: " .. template_path)
       end
     end
   end
@@ -86,4 +88,3 @@ function M.save_template(template_path, filename)
 end
 
 return M
-
