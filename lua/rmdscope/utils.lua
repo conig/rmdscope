@@ -56,5 +56,35 @@ function M.save_template(template_path, filename)
   print("Template saved to " .. filename)
 end
 
+-- Function to create a floating window
+function M.create_input_popup(prompt)
+  local input_buf = vim.api.nvim_create_buf(false, true)
+  local width = 40
+  local height = 1
+  local win_opts = {
+    relative = 'editor',
+    width = width,
+    height = height,
+    row = math.floor((vim.o.lines - height) / 2),
+    col = math.floor((vim.o.columns - width) / 2),
+    style = 'minimal',
+    border = 'single',
+  }
+  local win_id = vim.api.nvim_open_win(input_buf, true, win_opts)
+
+  vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, { prompt })
+
+  -- Set the cursor at the end of the prompt
+  vim.api.nvim_win_set_cursor(win_id, { 1, string.len(prompt) })
+
+  -- Capture the user's input
+  local input = vim.fn.input(prompt)
+
+  -- Close the window after input
+  vim.api.nvim_win_close(win_id, true)
+
+  return input
+end
+
 return M
 
