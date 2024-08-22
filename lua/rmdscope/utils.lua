@@ -59,7 +59,7 @@ end
 -- Updated function to create a floating window for input
 function M.create_input_popup(prompt, callback)
   local function create_float()
-    local width = 40
+    local width = 60
     local height = 1
     local buf = vim.api.nvim_create_buf(false, true)
     local win_opts = {
@@ -75,25 +75,34 @@ function M.create_input_popup(prompt, callback)
     return buf, win
   end
 
-  vim.ui.input({
-    prompt = prompt,
-    default = "",
-    completion = "file",
-    -- Use a custom window for input
-    window = {
-      type = "custom",
-      win = create_float,
-      buf = function(buf)
-        vim.api.nvim_buf_set_option(buf, 'buftype', 'prompt')
-        vim.api.nvim_buf_add_highlight(buf, -1, 'Normal', 0, 0, -1)
-        return buf
-      end,
-    }
-  }, function(input)
-    if input then
+  local buf, win = create_float()
+
+  -- Set buffer options
+  vim.api.nvim_buf_set_option(buf, 'buftype', 'prompt')
+  vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
+
+  -- Set prompt
+  vim.fn.prompt_setprompt(buf, prompt .. ' ')
+
+  -- Set callback for when Enter is pressed
+  vim.keymap.set('i', '<CR>', function()
+    local input = vim.trim(vim.api.nvim_buf_get_lines(buf, 0, -1, false)[1]:sub(#prompt + 2))
+    vim.api.nvim_win_close(win, true)
+    vim.schedule(function()
       callback(input)
-    end
-  end)
+    end)
+  end, { buffer = buf, noremap = true, silent = true })
+
+  -- Set callback for when Esc is pressed
+  vim.keymap.set('i', '<Esc>', function()
+    vim.api.nvim_win_close(win, true)
+    vim.schedule(function()
+      callback(nil)
+    end)
+  end, { buffer = buf, noremap = true, silent = true })
+
+  -- Enter insert mode
+  vim.cmd('startinsert!')
 end
 
 return M
