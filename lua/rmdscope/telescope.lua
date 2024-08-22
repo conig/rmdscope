@@ -41,13 +41,12 @@ function M.templates()
         local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
 
-        -- Use the new floating window for the filename input
-        local get_input = utils.create_input_popup("Save as: ")
-        local filename = get_input()
-
-        if filename ~= "" then
-          utils.save_template(selection.path, filename)
-        end
+        -- Use the new asynchronous floating window for the filename input
+        utils.create_input_popup("Save as: ", function(filename)
+          if filename and filename ~= "" then
+            utils.save_template(selection.path, filename)
+          end
+        end)
       end)
       return true
     end,

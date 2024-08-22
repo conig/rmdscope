@@ -56,62 +56,44 @@ function M.save_template(template_path, filename)
   print("Template saved to " .. filename)
 end
 
--- Updated function to create and use a floating window for input
-function M.create_input_popup(prompt)
-  local input_buf = vim.api.nvim_create_buf(false, true)
-  local width = 40
-  local height = 1
-  local win_opts = {
-    relative = 'editor',
-    width = width,
-    height = height,
-    row = math.floor((vim.o.lines - height) / 2),
-    col = math.floor((vim.o.columns - width) / 2),
-    style = 'minimal',
-    border = 'single',
-  }
-  local win_id = vim.api.nvim_open_win(input_buf, true, win_opts)
-
-  -- Set prompt in the buffer
-  vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, {prompt})
-
-  -- Set cursor position after the prompt
-  vim.api.nvim_win_set_cursor(win_id, {1, #prompt + 1})
-
-  -- Enter insert mode
-  vim.cmd('startinsert!')
-
-  -- Set up autocommands to close the window on specific events
-  vim.api.nvim_create_autocmd({"BufLeave", "WinLeave"}, {
-    buffer = input_buf,
-    callback = function()
-      vim.api.nvim_win_close(win_id, true)
-    end
-  })
-
-  -- Handle user input
-  local function on_input(input)
-    vim.api.nvim_win_close(win_id, true)
-    return input
+-- Updated function to create a floating window for input
+function M.create_input_popup(prompt, callback)
+  local function create_float()
+    local width = 40
+    local height = 1
+    local buf = vim.api.nvim_create_buf(false, true)
+    local win_opts = {
+      relative = 'editor',
+      width = width,
+      height = height,
+      row = math.floor((vim.o.lines - height) / 2),
+      col = math.floor((vim.o.columns - width) / 2),
+      style = 'minimal',
+      border = 'single',
+    }
+    local win = vim.api.nvim_open_win(buf, true, win_opts)
+    return buf, win
   end
 
-  -- Set up a callback for when the user presses Enter
-  vim.keymap.set('i', '<CR>', function()
-    local input = vim.api.nvim_buf_get_lines(input_buf, 0, -1, false)[1]
-    input = input:sub(#prompt + 1) -- Remove the prompt from the input
-    vim.schedule(function()
-      on_input(input)
-    end)
-  end, {buffer = input_buf, noremap = true})
-
-  -- Return a function that waits for user input
-  return function()
-    local input = nil
-    while input == nil do
-      vim.wait(100)
+  vim.ui.input({
+    prompt = prompt,
+    default = "",
+    completion = "file",
+    -- Use a custom window for input
+    window = {
+      type = "custom",
+      win = create_float,
+      buf = function(buf)
+        vim.api.nvim_buf_set_option(buf, 'buftype', 'prompt')
+        vim.api.nvim_buf_add_highlight(buf, -1, 'Normal', 0, 0, -1)
+        return buf
+      end,
+    }
+  }, function(input)
+    if input then
+      callback(input)
     end
-    return input
-  end
+  end)
 end
 
 return M
