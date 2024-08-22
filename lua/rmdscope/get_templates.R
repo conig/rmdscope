@@ -16,7 +16,8 @@ get_templates_json <- function() {
           data <- yaml::read_yaml(file)
           data$id <- id
           data$package <- pkg
-          data$path <- file
+          data$path <- rmarkdown:::pkg_file("rmarkdown", "templates", id, 
+                       package = pkg)
           templates[[paste0(pkg, "::", id)]] <- data
         }
       }
