@@ -14,8 +14,8 @@ end
 -- Function to get the list of R package templates
 function M.get_templates()
   -- Use R to get the list of available templates
-  local templates_str = vim.fn.system("Rscript -e 'cat(jsonlite::toJSON(unique(unlist(lapply(row.names(installed.packages()), function(x) rmarkdown::available_templates(x, full_path = TRUE))))))'")
-  local templates = vim.fn.json_decode(templates_str)
+local templates_str = vim.fn.system("Rscript -e 'cat(paste(unique(unlist(lapply(row.names(installed.packages()), function(x) rmarkdown::available_templates(x, full_path = TRUE)))), collapse=\"\\n\"))'")
+local templates = vim.split(templates_str, "\n")
 
   return templates
 end
