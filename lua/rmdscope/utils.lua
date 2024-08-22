@@ -84,9 +84,11 @@ function M.create_input_popup(prompt, callback)
   -- Set prompt before entering insert mode
   vim.fn.prompt_setprompt(buf, prompt .. ' ')
 
-  -- Enter insert mode after the buffer is fully set up
-  vim.api.nvim_set_current_buf(buf)
-  vim.cmd('startinsert!')
+  -- Defer entering insert mode to ensure the prompt is visible
+  vim.defer_fn(function()
+    vim.api.nvim_set_current_buf(buf)
+    vim.cmd('startinsert!')
+  end, 20)  -- Adjust the delay if needed
 
   -- Set callback for when Enter is pressed
   vim.keymap.set('i', '<CR>', function()
@@ -104,7 +106,6 @@ function M.create_input_popup(prompt, callback)
       callback(nil)
     end)
   end, { buffer = buf, noremap = true, silent = true })
-
 end
 
 return M
