@@ -80,10 +80,12 @@ function M.create_input_popup(prompt, callback)
   -- Set buffer options using vim.bo with buffer ID
   vim.bo[buf].buftype = 'prompt'
   vim.bo[buf].bufhidden = 'wipe'
-  -- Set prompt
+
+  -- Set prompt before entering insert mode
   vim.fn.prompt_setprompt(buf, prompt .. ' ')
 
-  -- Enter insert mode
+  -- Enter insert mode after the buffer is fully set up
+  vim.api.nvim_set_current_buf(buf)
   vim.cmd('startinsert!')
 
   -- Set callback for when Enter is pressed
@@ -103,8 +105,6 @@ function M.create_input_popup(prompt, callback)
     end)
   end, { buffer = buf, noremap = true, silent = true })
 
-  -- Enter insert mode
-  vim.cmd('startinsert!')
 end
 
 return M
