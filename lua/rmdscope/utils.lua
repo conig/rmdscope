@@ -17,20 +17,7 @@ function M.get_templates()
   local templates_str = vim.fn.system("Rscript -e 'cat(jsonlite::toJSON(unique(unlist(lapply(row.names(installed.packages()), function(x) rmarkdown::available_templates(x, full_path = TRUE))))))'")
   local templates = vim.fn.json_decode(templates_str)
 
-  -- Create a table to store the template paths
-  local template_paths = {}
-
-  -- Iterate through the list of templates and extract the relevant information
-  for _, template_info in ipairs(templates) do
-    local package_name = template_info.package
-    local template_name = template_info.name
-    local template_path = template_info.dir
-    
-    -- Add the full template path to the list
-    table.insert(template_paths, {package = package_name, name = template_name, path = template_path})
-  end
-
-  return template_paths
+  return templates
 end
 
 -- Function to read a template file
