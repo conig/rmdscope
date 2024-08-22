@@ -1,30 +1,31 @@
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
-local previewers = require("telescope.previewers")
+local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
-local conf = require("telescope.config").values
+local previewers = require("telescope.previewers")
 local utils = require("rmdscope.utils")
 
 local M = {}
 
 function M.templates()
-  -- Get the list of installed R packages and templates
   local templates = utils.get_templates()
 
-  pickers.new({}, {
-    prompt_title = "R Templates",
+  pickers.new(opts, {
+    prompt_title = "RMD Templates",
     finder = finders.new_table {
       results = templates,
       entry_maker = function(entry)
         return {
           value = entry,
-          display = entry,
-          ordinal = entry,
+          display = entry.value,
+          ordinal = entry.value,
         }
       end,
     },
+    sorter = conf.generic_sorter(opts),
     previewer = previewers.new_buffer_previewer({
+      title = "Template Preview",
       define_preview = function(self, entry)
         local template_content = utils.read_template(entry.value)
         if template_content then
@@ -34,14 +35,13 @@ function M.templates()
         end
       end,
     }),
-    sorter = conf.generic_sorter({}),
     attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
         local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
 
         -- Ask for a filename
-        local filename = vim.fn.input("Save as: ", selection.value)
+        local filename = vim.fn.input("Save as: ", selection.value.name .. ".Rmd")
 
         if filename ~= "" then
           utils.save_template(selection.value, filename)
@@ -57,4 +57,3 @@ function M.load_extension()
 end
 
 return M
-
