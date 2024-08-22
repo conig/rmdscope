@@ -72,13 +72,11 @@ function M.create_input_popup(prompt)
   }
   local win_id = vim.api.nvim_open_win(input_buf, true, win_opts)
 
+  -- Set initial content in the buffer
   vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, { prompt })
 
-  -- Set the cursor at the end of the prompt
-  vim.api.nvim_win_set_cursor(win_id, { 1, string.len(prompt) })
-
-  -- Capture the user's input
-  local input = vim.fn.input(prompt)
+  -- Allow the user to input their filename
+  local input = vim.fn.input({prompt = "", default = "", completion = "file", cancelreturn = ""})
 
   -- Close the window after input
   vim.api.nvim_win_close(win_id, true)
