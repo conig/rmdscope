@@ -36,20 +36,21 @@ function M.templates()
         end
       end,
     }),
-attach_mappings = function(prompt_bufnr, map)
-  actions.select_default:replace(function()
-    local selection = action_state.get_selected_entry()
-    actions.close(prompt_bufnr)
+    attach_mappings = function(prompt_bufnr, map)
+      actions.select_default:replace(function()
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
 
-    -- Use the floating window for the filename input
-    local filename = utils.create_input_popup("Save as: ")
+        -- Use the new floating window for the filename input
+        local get_input = utils.create_input_popup("Save as: ")
+        local filename = get_input()
 
-    if filename ~= "" then
-      utils.save_template(selection.path, filename)
-    end
-  end)
-  return true
-end,
+        if filename ~= "" then
+          utils.save_template(selection.path, filename)
+        end
+      end)
+      return true
+    end,
   }):find()
 end
 

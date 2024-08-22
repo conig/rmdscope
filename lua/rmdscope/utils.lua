@@ -56,7 +56,7 @@ function M.save_template(template_path, filename)
   print("Template saved to " .. filename)
 end
 
--- Function to create a floating window
+-- Updated function to create and use a floating window for input
 function M.create_input_popup(prompt)
   local input_buf = vim.api.nvim_create_buf(false, true)
   local width = 40
@@ -72,17 +72,46 @@ function M.create_input_popup(prompt)
   }
   local win_id = vim.api.nvim_open_win(input_buf, true, win_opts)
 
-  -- Set initial content in the buffer
-  vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, { prompt })
+  -- Set prompt in the buffer
+  vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, {prompt})
 
-  -- Allow the user to input their filename
-  local input = vim.fn.input({prompt = "", default = "", completion = "file", cancelreturn = ""})
+  -- Set cursor position after the prompt
+  vim.api.nvim_win_set_cursor(win_id, {1, #prompt + 1})
 
-  -- Close the window after input
-  vim.api.nvim_win_close(win_id, true)
+  -- Enter insert mode
+  vim.cmd('startinsert!')
 
-  return input
+  -- Set up autocommands to close the window on specific events
+  vim.api.nvim_create_autocmd({"BufLeave", "WinLeave"}, {
+    buffer = input_buf,
+    callback = function()
+      vim.api.nvim_win_close(win_id, true)
+    end
+  })
+
+  -- Handle user input
+  local function on_input(input)
+    vim.api.nvim_win_close(win_id, true)
+    return input
+  end
+
+  -- Set up a callback for when the user presses Enter
+  vim.keymap.set('i', '<CR>', function()
+    local input = vim.api.nvim_buf_get_lines(input_buf, 0, -1, false)[1]
+    input = input:sub(#prompt + 1) -- Remove the prompt from the input
+    vim.schedule(function()
+      on_input(input)
+    end)
+  end, {buffer = input_buf, noremap = true})
+
+  -- Return a function that waits for user input
+  return function()
+    local input = nil
+    while input == nil do
+      vim.wait(100)
+    end
+    return input
+  end
 end
 
 return M
-
