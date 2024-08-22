@@ -11,7 +11,7 @@ local M = {}
 function M.templates()
   local templates = utils.get_templates()
 
-  pickers.new(opts, {
+  pickers.new({}, {
     prompt_title = "RMD Templates",
     finder = finders.new_table {
       results = templates,
@@ -20,11 +20,11 @@ function M.templates()
           value = entry,
           display = entry.name .. " (" .. entry.package .. ")",
           ordinal = entry.name,
-          path = entry.package .. "::" .. entry.id,
+          path = entry.path,
         }
       end,
     },
-    sorter = conf.generic_sorter(opts),
+    sorter = conf.generic_sorter({}),
     previewer = previewers.new_buffer_previewer({
       title = "Template Preview",
       define_preview = function(self, entry)
@@ -42,7 +42,7 @@ function M.templates()
         actions.close(prompt_bufnr)
 
         -- Ask for a filename
-        local filename = vim.fn.input("Save as: ", selection.value .. ".Rmd")
+        local filename = vim.fn.input("Save as: ", selection.value.id .. ".Rmd")
 
         if filename ~= "" then
           utils.save_template(selection.path, filename)
@@ -58,4 +58,3 @@ function M.load_extension()
 end
 
 return M
-

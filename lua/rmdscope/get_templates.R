@@ -16,6 +16,7 @@ get_templates_json <- function() {
           data <- yaml::read_yaml(file)
           data$id <- id
           data$package <- pkg
+          data$path <- file
           templates[[paste0(pkg, "::", id)]] <- data
         }
       }
