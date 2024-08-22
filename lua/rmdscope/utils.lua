@@ -1,4 +1,5 @@
 local M = {}
+local json = require('dkjson') -- You might need to install a JSON parser like 'dkjson'
 
 -- Function to read the contents of a file
 local function read_file(filepath)
@@ -13,10 +14,16 @@ end
 
 -- Function to get the list of R package templates
 function M.get_templates()
-  -- Use R to get the list of available templates
-local templates_str = vim.fn.system("Rscript -e 'cat(paste(unique(unlist(lapply(row.names(installed.packages()), function(x) rmarkdown::available_templates(x, full_path = TRUE)))), collapse=\"\\n\"))'")
-local templates = vim.split(templates_str, "\n")
+  -- Use the R script to get the list of available templates in JSON format
+  local templates_json_str = vim.fn.system("Rscript " .. vim.fn.expand("<sfile>:p:h") .. "/get_templates.R")
+  
+  -- Parse the JSON output from the R script
+  local templates, pos, err = json.decode(templates_json_str)
+  if err then
+    error("Error parsing JSON: " .. err)
+  end
 
+  -- Return the parsed JSON as a Lua table
   return templates
 end
 

@@ -18,8 +18,9 @@ function M.templates()
       entry_maker = function(entry)
         return {
           value = entry,
-          display = entry.value,
-          ordinal = entry.value,
+          display = entry.name .. " (" .. entry.package .. ")",
+          ordinal = entry.name,
+          path = entry.package .. "::" .. entry.id,
         }
       end,
     },
@@ -27,7 +28,7 @@ function M.templates()
     previewer = previewers.new_buffer_previewer({
       title = "Template Preview",
       define_preview = function(self, entry)
-        local template_content = utils.read_template(entry.value)
+        local template_content = utils.read_template(entry.path)
         if template_content then
           vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(template_content, "\n"))
         else
@@ -41,10 +42,10 @@ function M.templates()
         actions.close(prompt_bufnr)
 
         -- Ask for a filename
-        local filename = vim.fn.input("Save as: ", selection.value.name .. ".Rmd")
+        local filename = vim.fn.input("Save as: ", selection.value .. ".Rmd")
 
         if filename ~= "" then
-          utils.save_template(selection.value, filename)
+          utils.save_template(selection.path, filename)
         end
       end)
       return true
@@ -57,3 +58,4 @@ function M.load_extension()
 end
 
 return M
+
