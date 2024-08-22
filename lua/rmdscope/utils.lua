@@ -13,8 +13,11 @@ end
 
 -- Function to get the list of R package templates
 function M.get_templates()
+  -- Set the correct path to the R script
+  local script_path = vim.fn.stdpath("data") .. "/lazy/rmdscope/lua/rmdscope/get_templates.R"
+
   -- Use the R script to get the list of available templates in JSON format
-  local templates_json_str = vim.fn.system("Rscript " .. vim.fn.expand("<sfile>:p:h") .. "/get_templates.R")
+  local templates_json_str = vim.fn.system("Rscript " .. script_path)
   
   -- Parse the JSON output from the R script using Neovim's built-in JSON decoder
   local templates = vim.fn.json_decode(templates_json_str)
