@@ -56,56 +56,18 @@ function M.save_template(template_path, filename)
   print("Template saved to " .. filename)
 end
 
--- Updated function to create a floating window for input
+-- Function to create a simple input popup using Neovim's input function
 function M.create_input_popup(prompt, callback)
-  local function create_float()
-    local width = 60
-    local height = 1
-    local buf = vim.api.nvim_create_buf(false, true)
-    local win_opts = {
-      relative = 'editor',
-      width = width,
-      height = height,
-      row = math.floor((vim.o.lines - height) / 2),
-      col = math.floor((vim.o.columns - width) / 2),
-      style = 'minimal',
-      border = 'single',
-    }
-    local win = vim.api.nvim_open_win(buf, true, win_opts)
-    return buf, win
+  -- Use Neovim's built-in input function for simpler handling
+  local input = vim.fn.input(prompt .. ' ')
+  
+  -- Handle the input value
+  if input and input ~= "" then
+    callback(input)
+  else
+    callback(nil)
   end
-
-  local buf, win = create_float()
-
-  -- Set buffer options using vim.bo with buffer ID
-  vim.bo[buf].buftype = 'prompt'
-  vim.bo[buf].bufhidden = 'wipe'
-
-  -- Set prompt before entering insert mode
-  vim.fn.prompt_setprompt(buf, prompt .. ' ')
-
-  -- Defer entering insert mode to ensure the prompt is visible
-  vim.defer_fn(function()
-    vim.api.nvim_set_current_buf(buf)
-    vim.cmd('startinsert!')
-  end, 20)  -- Adjust the delay if needed
-
-  -- Set callback for when Enter is pressed
-  vim.keymap.set('i', '<CR>', function()
-    local input = vim.trim(vim.api.nvim_buf_get_lines(buf, 0, -1, false)[1]:sub(#prompt + 2))
-    vim.api.nvim_win_close(win, true)
-    vim.schedule(function()
-      callback(input)
-    end)
-  end, { buffer = buf, noremap = true, silent = true })
-
-  -- Set callback for when Esc is pressed
-  vim.keymap.set('i', '<Esc>', function()
-    vim.api.nvim_win_close(win, true)
-    vim.schedule(function()
-      callback(nil)
-    end)
-  end, { buffer = buf, noremap = true, silent = true })
 end
 
 return M
+
