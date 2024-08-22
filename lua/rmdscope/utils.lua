@@ -77,12 +77,14 @@ function M.create_input_popup(prompt, callback)
 
   local buf, win = create_float()
 
-  -- Set buffer options
-  vim.api.nvim_buf_set_option(buf, 'buftype', 'prompt')
-  vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-
+  -- Set buffer options using vim.bo with buffer ID
+  vim.bo[buf].buftype = 'prompt'
+  vim.bo[buf].bufhidden = 'wipe'
   -- Set prompt
   vim.fn.prompt_setprompt(buf, prompt .. ' ')
+
+  -- Enter insert mode
+  vim.cmd('startinsert!')
 
   -- Set callback for when Enter is pressed
   vim.keymap.set('i', '<CR>', function()
