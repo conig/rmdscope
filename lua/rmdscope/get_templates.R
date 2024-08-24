@@ -33,7 +33,6 @@ get_templates_json <- function() {
 
   json <- jsonlite::toJSON(template_list, auto_unbox = TRUE)
 
-
   # Return the JSON string
   cat(json)
 }
