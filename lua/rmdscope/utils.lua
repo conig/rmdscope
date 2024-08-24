@@ -34,10 +34,24 @@ function M.read_template(template_path)
   return read_file(template_path)
 end
 
--- Function to save a template to a file
+-- Updated function to save a template to a file, supporting subdirectories
 function M.save_template(template_path, filename)
   local content = M.read_template(template_path)
   
+  -- Extract directory path from filename
+  local dir_path = vim.fn.fnamemodify(filename, ':h')
+  
+  -- Create directory if it doesn't exist
+  if dir_path ~= '.' and vim.fn.isdirectory(dir_path) == 0 then
+    local create_dir = vim.fn.input("Directory doesn't exist. Create it? (y/n): ")
+    if create_dir:lower() == 'y' then
+      vim.fn.mkdir(dir_path, "p")
+    else
+      print("Operation cancelled")
+      return
+    end
+  end
+
   if vim.fn.filereadable(filename) == 1 then
     local answer = vim.fn.input("File exists. Overwrite? (y/n): ")
     if answer:lower() ~= 'y' then
@@ -112,4 +126,3 @@ function M.create_input_popup(prompt, callback)
 end
 
 return M
-
