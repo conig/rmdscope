@@ -27,7 +27,12 @@ get_templates_json <- function() {
   })
 
   template_list <- unname(as.list(templates))
+  # Sort the templates by name
+  template_sort_order <- order(sapply(template_list, function(x) x$name))
+  template_list <- template_list[template_sort_order]
+
   json <- jsonlite::toJSON(template_list, auto_unbox = TRUE)
+
 
   # Return the JSON string
   cat(json)
