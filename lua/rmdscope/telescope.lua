@@ -41,10 +41,16 @@ function M.templates()
         local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
 
-        -- Use the new asynchronous floating window for the filename input
-        utils.create_input_popup("Save as: ", function(filename)
+        -- Get the current working directory
+        local cwd = vim.fn.getcwd()
+        local default_value = cwd .. "/"
+
+        -- Use vim.ui.input to prompt for the filename with a default value
+        vim.ui.input({ prompt = "Save as: ", default = default_value }, function(filename)
           if filename and filename ~= "" then
             utils.save_template(selection.path, filename)
+          else
+            print("No filename provided, operation cancelled")
           end
         end)
       end)
