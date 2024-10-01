@@ -1,5 +1,7 @@
 # Install with lazy
 
+Example configuration:
+
 ```lua
 {
 "conig/rmdscope",
