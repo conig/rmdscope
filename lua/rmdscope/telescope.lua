@@ -5,6 +5,7 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local previewers = require("telescope.previewers")
 local utils = require("rmdscope.utils")
+local lib = require("nvim-tree.lib")  -- Use nvim-tree's lib module
 
 local M = {}
 
@@ -41,18 +42,35 @@ function M.templates()
         local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
 
-        -- Get the current working directory
-        local cwd = vim.fn.getcwd()
-        local default_value = cwd .. "/"
+        -- Get the currently selected node in nvim-tree
+        local node = lib.get_node_at_cursor()
 
-        -- Use vim.ui.input to prompt for the filename with a default value
-        vim.ui.input({ prompt = "Save as: ", default = default_value }, function(filename)
-          if filename and filename ~= "" then
-            utils.save_template(selection.path, filename)
+        local dir_path
+
+        if node then
+          -- Check if the node is a directory
+          if node.fs_stat and node.fs_stat.type == "directory" then
+            dir_path = node.absolute_path
           else
-            print("No filename provided, operation cancelled")
+            -- Use the parent directory of the file node
+            dir_path = node.parent.absolute_path
           end
-        end)
+        else
+          -- If no node is selected, use the current working directory
+          dir_path = vim.fn.getcwd()
+        end
+
+        -- Provide the directory path as default value
+        local default_value = dir_path .. "/"
+
+        -- Prompt the user for the filename using vim.fn.input
+        local filename = vim.fn.input("Save as: ", default_value)
+        if filename and filename ~= "" then
+          utils.save_template(selection.path, filename)
+          print("Template saved to: " .. filename)
+        else
+          print("No filename provided, operation cancelled")
+        end
       end)
       return true
     end,
