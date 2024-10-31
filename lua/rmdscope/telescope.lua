@@ -77,6 +77,75 @@ function M.templates()
   }):find()
 end
 
+function M.insert_object_member()
+  utils.read_object_names()
+  -- Get the JSON data (list of objects with 'name' and 'contents')
+  local objects = utils.get_clipboard_objects()  -- Replace with your actual function to get the JSON data
+  if not objects or vim.tbl_isempty(objects) then
+    print("No objects found.")
+    return
+  end
+
+  -- Set up the Telescope picker
+  pickers.new({}, {
+    prompt_title = "Select Object Member",
+    finder = finders.new_table {
+      results = objects,
+      entry_maker = function(entry)
+        return {
+          value = entry,
+          display = entry.name,
+          ordinal = entry.name,
+          contents = entry.contents,
+        }
+      end,
+    },
+    sorter = conf.generic_sorter({}),
+    previewer = previewers.new_buffer_previewer({
+      title = "Object Details",
+      define_preview = function(self, entry)
+        local contents = entry.value.contents
+        if contents then
+          vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(contents, "\n"))
+        else
+          vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {"No contents available"})
+        end
+      end,
+    }),
+    attach_mappings = function(prompt_bufnr, map)
+      actions.select_default:replace(function()
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+
+        if not selection then
+          print("No selection made.")
+          return
+        end
+
+        local selected_name = selection.value.name
+
+        -- Move to the end of the word under the cursor on the right
+        -- Get the current cursor position
+        local row, col = table.unpack(vim.api.nvim_win_get_cursor(0))
+        local line = vim.api.nvim_get_current_line()
+
+        -- Find the end of the word under the cursor
+        local _, word_end_col = line:find("%w+", col + 1)
+
+        if word_end_col then
+          -- Move cursor to the end of the word
+          vim.api.nvim_win_set_cursor(0, { row, word_end_col })
+        end
+
+        -- Insert the dollar symbol and the selected name
+        vim.api.nvim_put({ '$' .. selected_name }, 'c', true, true)
+      end)
+      return true
+    end,
+  }):find()
+end
+
+
 function M.load_extension()
   require("telescope").load_extension("rmdscope")
 end

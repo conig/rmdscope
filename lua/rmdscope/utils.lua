@@ -18,7 +18,6 @@ function M.get_templates()
 
   -- Use the R script to get the list of available templates in JSON format
   local templates_json_str = vim.fn.system("Rscript " .. script_path)
-  
   -- Parse the JSON output from the R script using Neovim's built-in JSON decoder
   local templates = vim.fn.json_decode(templates_json_str)
   if not templates then
@@ -125,4 +124,40 @@ function M.create_input_popup(prompt, callback)
   end, { buffer = buf, noremap = true, silent = true })
 end
 
+-- Function to read object names
+function M.read_object_names()
+  -- Get the word under the cursor
+  local word = vim.fn.expand("<cword>")
+
+  -- Escape double quotes in word
+  word = word:gsub('"', '\\"')
+
+  -- Format the command string with properly escaped quotes
+  local cmd = 'nvimscope.r::nvimclip("' .. word .. '")'
+
+  -- Send the command to slimetree
+  require("nvim-slimetree").goo_send(cmd)
+
+end
+
+function M.get_clipboard_objects()
+  -- Get the JSON string from the system clipboard
+  local json_str = vim.fn.getreg('+') -- '+' represents the system clipboard register
+
+  if not json_str or json_str == '' then
+    print('Clipboard is empty or not accessible')
+    return nil
+  end
+
+  -- Decode the JSON string
+  local ok, objects = pcall(vim.fn.json_decode, json_str)
+  if not ok then
+    print('Failed to decode JSON from clipboard: ' .. objects)
+    return nil
+  end
+
+  return objects
+end
+
 return M
+
