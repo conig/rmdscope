@@ -125,7 +125,7 @@ function M.create_input_popup(prompt, callback)
 end
 
 -- Function to read object names
-function M.read_object_names()
+function M.write_object_names()
   -- Get the word under the cursor
   local word = vim.fn.expand("<cword>")
 
@@ -137,25 +137,36 @@ function M.read_object_names()
 
   -- Send the command to slimetree
   require("nvim-slimetree").goo_send(cmd)
-
 end
 
-function M.get_clipboard_objects()
-  -- Get the JSON string from the system clipboard
-  local json_str = vim.fn.getreg('+') -- '+' represents the system clipboard register
+function M.read_object_names()
+ -- Define the path to the temporary JSON file
+  local temp_path = "tmp/rmdclip/menu.json"
 
-  if not json_str or json_str == '' then
-    print('Clipboard is empty or not accessible')
+  -- Check if the temporary file exists
+  if vim.fn.filereadable(temp_path) ~= 1 then
+    print("Temporary file does not exist: " .. temp_path)
     return nil
   end
+
+  -- Read the contents of the temporary file
+  local json_str = read_file(temp_path)
 
   -- Decode the JSON string
   local ok, objects = pcall(vim.fn.json_decode, json_str)
   if not ok then
-    print('Failed to decode JSON from clipboard: ' .. objects)
+    print('Failed to decode JSON from temp file: ' .. objects)
     return nil
   end
 
+  -- Delete the temporary file after decoding
+  local delete_ok, delete_err = os.remove(temp_path)
+  if not delete_ok then
+    print("Failed to delete temporary file: " .. delete_err)
+    -- Depending on your preference, you might want to return here or continue
+  end
+
+  -- Return the decoded objects
   return objects
 end
 

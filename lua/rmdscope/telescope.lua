@@ -78,9 +78,30 @@ function M.templates()
 end
 
 function M.insert_object_member()
-  utils.read_object_names()
+
+  -- If this file exists, delete it:
+  local temp_path = "tmp/rmdclip/menu.json"
+  if vim.fn.filereadable(temp_path) == 1 then
+    vim.fn.delete(temp_path)
+  end
+  -- Write the object names to the temp file
+  utils.write_object_names()
+
+  -- Wait until the file is writtern
+  local total_wait = 0
+  while vim.fn.filereadable(temp_path) == 0 and total_wait <= 2500 do
+    vim.wait(100)
+    total_wait = total_wait + 100
+  end
+
+  if total_wait >= 2500 then
+    print("Timeout waiting for temporary file to be written.")
+    return
+  end
+
+  -- Ensure object names are read and placed in the clipboard
   -- Get the JSON data (list of objects with 'name' and 'contents')
-  local objects = utils.get_clipboard_objects()  -- Replace with your actual function to get the JSON data
+  local objects = utils.read_object_names()
   if not objects or vim.tbl_isempty(objects) then
     print("No objects found.")
     return
@@ -123,22 +144,35 @@ function M.insert_object_member()
         end
 
         local selected_name = selection.value.name
+        vim.notify("Selected name: " .. selected_name, vim.log.levels.INFO)
 
-        -- Move to the end of the word under the cursor on the right
-        -- Get the current cursor position
-        local row, col = table.unpack(vim.api.nvim_win_get_cursor(0))
+        -- Get cursor position and line
+        local cursor_pos = vim.api.nvim_win_get_cursor(0)
+        local row = cursor_pos[1]
+        local col = cursor_pos[2]
         local line = vim.api.nvim_get_current_line()
+        vim.notify(string.format("Cursor position before: row=%d, col=%d", row, col), vim.log.levels.DEBUG)
+        vim.notify("Current line: " .. line, vim.log.levels.DEBUG)
 
         -- Find the end of the word under the cursor
-        local _, word_end_col = line:find("%w+", col + 1)
+        -- Adjust the pattern if your object names include characters other than alphanumerics
+        local word_start, word_end_col = line:find("([_%w]+)", col + 1)
 
         if word_end_col then
           -- Move cursor to the end of the word
           vim.api.nvim_win_set_cursor(0, { row, word_end_col })
+          vim.notify(string.format("Cursor moved to end of word at col=%d", word_end_col), vim.log.levels.DEBUG)
+        else
+          -- If no word is found after the cursor, move to the end of the line
+          local line_length = #line
+          vim.api.nvim_win_set_cursor(0, { row, line_length })
+          vim.notify(string.format("No word found after cursor. Moved cursor to end of line at col=%d", line_length), vim.log.levels.DEBUG)
         end
 
         -- Insert the dollar symbol and the selected name
+        -- Using vim.api.nvim_put
         vim.api.nvim_put({ '$' .. selected_name }, 'c', true, true)
+        vim.notify("Inserted $" .. selected_name, vim.log.levels.INFO)
       end)
       return true
     end,
