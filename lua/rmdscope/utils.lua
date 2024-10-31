@@ -141,7 +141,7 @@ end
 
 function M.read_object_names()
  -- Define the path to the temporary JSON file
-  local temp_path = "tmp/rmdclip/menu.json"
+  local temp_path = "/tmp/rmdclip/menu.json"
 
   -- Check if the temporary file exists
   if vim.fn.filereadable(temp_path) ~= 1 then

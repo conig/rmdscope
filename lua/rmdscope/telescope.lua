@@ -80,7 +80,7 @@ end
 function M.insert_object_member()
 
   -- If this file exists, delete it:
-  local temp_path = "tmp/rmdclip/menu.json"
+  local temp_path = "/tmp/rmdclip/menu.json"
   if vim.fn.filereadable(temp_path) == 1 then
     vim.fn.delete(temp_path)
   end
@@ -109,7 +109,7 @@ function M.insert_object_member()
 
   -- Set up the Telescope picker
   pickers.new({}, {
-    prompt_title = "Select Object Member",
+    prompt_title = "Select Object",
     finder = finders.new_table {
       results = objects,
       entry_maker = function(entry)
