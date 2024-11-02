@@ -169,11 +169,11 @@ function M.insert_object_member()
 
 					-- Find the end of the word under the cursor
 					-- Adjust the pattern if your object names include characters other than alphanumerics
-					local word_start, word_end_col = line:find("([_%w]+)", col + 1)
+					local word_start, word_end_col = line:find("([_%w$]+)", col + 1)
 
 					if word_end_col then
 						-- Move cursor to the end of the word
-						vim.api.nvim_win_set_cursor(0, { row, word_end_col })
+						vim.api.nvim_win_set_cursor(0, { row, word_end_col - 1})
 						vim.notify(
 							string.format("Cursor moved to end of word at col=%d", word_end_col),
 							vim.log.levels.DEBUG
