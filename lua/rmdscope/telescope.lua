@@ -157,44 +157,44 @@ function M.insert_object_member()
 					end
 
 					local selected_name = selection.value.name
-					vim.notify("Selected name: " .. selected_name, vim.log.levels.INFO)
+					-- vim.notify("Selected name: " .. selected_name, vim.log.levels.INFO)
 
 					-- Get cursor position and line
 					local cursor_pos = vim.api.nvim_win_get_cursor(0)
 					local row = cursor_pos[1]
 					local col = cursor_pos[2]
 					local line = vim.api.nvim_get_current_line()
-					vim.notify(string.format("Cursor position before: row=%d, col=%d", row, col), vim.log.levels.DEBUG)
-					vim.notify("Current line: " .. line, vim.log.levels.DEBUG)
+					-- vim.notify(string.format("Cursor position before: row=%d, col=%d", row, col), vim.log.levels.DEBUG)
+					-- vim.notify("Current line: " .. line, vim.log.levels.DEBUG)
 
 					-- Find the end of the word under the cursor
 					-- Adjust the pattern if your object names include characters other than alphanumerics
-					local word_start, word_end_col = line:find("([_%w$]+)", col + 1)
+          local word_start, word_end_col = line:find("([_%w$]+)", col + 1)
 
 					if word_end_col then
 						-- Move cursor to the end of the word
 						vim.api.nvim_win_set_cursor(0, { row, word_end_col - 1})
-						vim.notify(
-							string.format("Cursor moved to end of word at col=%d", word_end_col),
-							vim.log.levels.DEBUG
-						)
+						-- vim.notify(
+						-- 	string.format("Cursor moved to end of word at col=%d", word_end_col),
+						-- 	vim.log.levels.DEBUG
+						-- )
 					else
 						-- If no word is found after the cursor, move to the end of the line
 						local line_length = #line
 						vim.api.nvim_win_set_cursor(0, { row, line_length })
-						vim.notify(
-							string.format(
-								"No word found after cursor. Moved cursor to end of line at col=%d",
-								line_length
-							),
-							vim.log.levels.DEBUG
-						)
+						-- vim.notify(
+						-- 	string.format(
+						-- 		"No word found after cursor. Moved cursor to end of line at col=%d",
+						-- 		line_length
+						-- 	),
+						-- 	vim.log.levels.DEBUG
+						-- )
 					end
 
 					-- Insert the dollar symbol and the selected name
 					-- Using vim.api.nvim_put
 					vim.api.nvim_put({ "$" .. selected_name }, "c", true, true)
-					vim.notify("Inserted $" .. selected_name, vim.log.levels.INFO)
+					-- vim.notify("Inserted $" .. selected_name, vim.log.levels.INFO)
 				end)
 				return true
 			end,
