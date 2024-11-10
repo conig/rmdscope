@@ -122,6 +122,7 @@ function M.insert_object_member()
     -- Determine cursor starting position, or break
      -- Adjust the cursor position, or abort if adjustment is not applicable
     if not adjust_cursor() then
+      vim.notify("Cursor is not adjacent to code", vim.log.levels.INFO)
         return -- do nothing
     end
 
