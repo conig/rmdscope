@@ -228,6 +228,8 @@ function M.insert_object_member()
 
 					-- Use nvim_buf_set_text to insert text at the precise position
 					vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { insert_text })
+          local new_cursor_col = end_col + #insert_text
+          vim.api.nvim_win_set_cursor(0, { row + 1, new_cursor_col })
 				end)
 				return true
 			end,
