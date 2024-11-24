@@ -97,6 +97,13 @@ local function adjust_cursor()
         local char_under = line:sub(col + 1, col + 1)
         local char_left = col > 0 and line:sub(col, col) or nil
         local char_right = col + 2 <= #line and line:sub(col + 2, col + 2) or nil
+         -- Check if on a single-letter word**
+        if is_non_whitespace(char_under) and
+          (is_whitespace(char_left) or not char_left) and
+          (is_whitespace(char_right) or not char_right) then
+            -- Single-letter word detected, return true
+          return true
+          end
 
         -- Rule: If character under cursor is whitespace and characters to the left and right are whitespace, abort
         if is_whitespace(char_under) and (is_whitespace(char_left) or not char_left) and (is_whitespace(char_right) or not char_right) then
