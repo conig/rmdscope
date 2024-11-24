@@ -211,6 +211,9 @@ function M.insert_object_member()
 					end
 
 					local selected_name = selection.value.name
+          if selected_name:find(" ") then
+            selected_name = "`" .. selected_name .. "`"
+          end
 					-- vim.notify("Selected name: " .. selected_name, vim.log.levels.INFO)
 
 					-- Get cursor position and line
@@ -229,6 +232,10 @@ function M.insert_object_member()
 					while end_col < #line and is_word_char(line:sub(end_col + 1, end_col + 1)) do
 						end_col = end_col + 1
 					end
+          -- Check for closing backtick
+          if line:sub(end_col + 1, end_col + 1) == '`' then
+            end_col = end_col + 1
+          end
 
 					-- Insert the dollar symbol and the selected name at the correct position
 					local insert_text = "$" .. selected_name
