@@ -172,7 +172,17 @@ function M.insert_object_member()
 
 	-- Ensure object names are read and placed in the clipboard
 	-- Get the JSON data (list of objects with 'name' and 'contents')
-	local objects = utils.read_object_names()
+	local objects_all = utils.read_object_names()
+	local objects = objects_all and objects_all.contents
+	local isS4 = objects_all and objects_all.s4[1]
+	-- determine assignment_char
+  local assignment_char
+	if isS4 == "true" then
+		assignment_char = "@"
+	else
+		assignment_char = "$"
+	end
+
 	if not objects or vim.tbl_isempty(objects) then
 		print("No objects found.")
 		return
@@ -243,7 +253,7 @@ function M.insert_object_member()
 					end
 
 					-- Insert the dollar symbol and the selected name at the correct position
-					local insert_text = "$" .. selected_name
+					local insert_text = assignment_char .. selected_name
 
 					-- Use nvim_buf_set_text to insert text at the precise position
 					vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { insert_text })
