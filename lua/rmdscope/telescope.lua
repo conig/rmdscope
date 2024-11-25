@@ -86,6 +86,11 @@ local function adjust_cursor()
 	local col = cursor_pos[2]
 	local line = vim.api.nvim_get_current_line()
 
+	-- Check if the line is empty
+	if line == "" then
+		return false
+	end
+
 	local function is_whitespace(char)
 		return char and char:match("%s")
 	end
