@@ -244,8 +244,8 @@ function M.insert_object_member()
 
 					-- Function to check if a character is part of a word
 					local function is_word_char(char)
-						return char:match("[%w_%$]") ~= nil
-					end
+					return char:match("[%w_%$%.]") ~= nil
+        end
 
 					-- Find the end of the word under the cursor
 					local end_col = col
