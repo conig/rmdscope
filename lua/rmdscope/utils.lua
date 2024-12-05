@@ -14,7 +14,9 @@ end
 -- Function to get the list of R package templates
 function M.get_templates()
 	-- Set the correct path to the R script
-	local script_path = vim.fn.stdpath("data") .. "/lazy/rmdscope/lua/rmdscope/get_templates.R"
+	local current_file = debug.getinfo(1, "S").source:sub(2) -- full path of utils.lua
+  local plugin_dir = vim.fn.fnamemodify(current_file, ":h")
+  local script_path = plugin_dir .. "/get_templates.R"
 
 	-- Use the R script to get the list of available templates in JSON format
 	local templates_json_str = vim.fn.system("Rscript " .. script_path)
