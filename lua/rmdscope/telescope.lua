@@ -43,35 +43,18 @@ function M.templates()
 					local selection = action_state.get_selected_entry()
 					actions.close(prompt_bufnr)
 
-					-- Get the currently selected node in nvim-tree
-					local node = lib.get_node_at_cursor()
+					-- Get the current working directory
+					local cwd = vim.fn.getcwd()
+					local default_value = cwd .. "/"
 
-					local dir_path
-
-					if node then
-						-- Check if the node is a directory
-						if node.fs_stat and node.fs_stat.type == "directory" then
-							dir_path = node.absolute_path
+					-- Use vim.ui.input to prompt for the filename with a default value
+					vim.ui.input({ prompt = "Save as: ", default = default_value }, function(filename)
+						if filename and filename ~= "" then
+							utils.save_template(selection.path, filename)
 						else
-							-- Use the parent directory of the file node
-							dir_path = node.parent.absolute_path
+							print("No filename provided, operation cancelled")
 						end
-					else
-						-- If no node is selected, use the current working directory
-						dir_path = vim.fn.getcwd()
-					end
-
-					-- Provide the directory path as default value
-					local default_value = dir_path .. "/"
-
-					-- Prompt the user for the filename using vim.fn.input
-					local filename = vim.fn.input("Save as: ", default_value)
-					if filename and filename ~= "" then
-						utils.save_template(selection.path, filename)
-						print("Template saved to: " .. filename)
-					else
-						print("No filename provided, operation cancelled")
-					end
+					end)
 				end)
 				return true
 			end,
@@ -181,7 +164,7 @@ function M.insert_object_member()
 	local objects = objects_all and objects_all.contents
 	local isS4 = objects_all and objects_all.s4[1]
 	-- determine assignment_char
-  local assignment_char
+	local assignment_char
 	if isS4 == "true" then
 		assignment_char = "@"
 	else
@@ -244,8 +227,8 @@ function M.insert_object_member()
 
 					-- Function to check if a character is part of a word
 					local function is_word_char(char)
-					return char:match("[%w_%$%.]") ~= nil
-        end
+						return char:match("[%w_%$%.]") ~= nil
+					end
 
 					-- Find the end of the word under the cursor
 					local end_col = col
