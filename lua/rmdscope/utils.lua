@@ -263,7 +263,7 @@ function M.write_object_names()
 	local cmd = "nvimscope.r::nvimclip(" .. obj .. ")"
 
 	-- Send the command to slimetree
-	require("nvim-slimetree").goo_send(cmd)
+	require("nvim-slimetree").slimetree.goo_send(cmd)
 end
 
 function M.read_object_names()
